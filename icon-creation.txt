@@ -1,0 +1,16 @@
+For the PWA icons, you'll need to create two image files:
+
+1. icon-192.png (192x192 pixels)
+2. icon-512.png (512x512 pixels)
+
+You can use a simple heart emoji or other love-themed image as your icon.
+
+Quick ways to create these icons:
+
+1. Use an online tool like https://favicon.io/
+2. Use a graphic design tool like Canva
+3. Convert an existing image to the right size
+
+Once created, place these files in the root directory of your project.
+
+These icons will allow your girlfriend to add the love letter to her home screen like an app.

@@ -1,0 +1,22 @@
+{
+  "name": "Virtual Love Letter",
+  "short_name": "Love Letter",
+  "description": "A beautiful interactive love letter with photos and memories",
+  "start_url": "./virtual-love-letter.html",
+  "display": "standalone",
+  "background_color": "#ff6b8b",
+  "theme_color": "#ff6b8b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

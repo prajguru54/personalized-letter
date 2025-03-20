@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ff6b8b">
+    <meta name="description" content="A virtual love letter with interactive memories and photos">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
     <title>My Virtual Love Letter 💌</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -440,8 +444,8 @@
     <script>
         // Image collections for different categories
         // Add or remove images from these arrays to update the galleries
-        const MEETINGS_IMAGES = ['20241214_141835.jpg', '20241214_141825.jpg', '20241214_141931.jpg'];
-        const PERFECT_MOMENTS_IMAGES = ['20250114_161748.jpg', '20250202_142310.jpg', '20250202_154933.jpg', '20250112_153159.jpg', '20250315_200931.jpg', '20250125_151139.jpg', '20250309_133946.jpg', '20250201_171103.jpg', '20250216_141835.jpg', '20250125_151234.jpg', '20250214_174922.jpg', '20250125_184123.jpg', '20250208_164427.jpg', '20250206_193905.jpg', '20250301_142704.jpg'];
+        const MEETINGS_IMAGES = ['rabbit.jpg', 'rabbbit_2.jpg'];
+        const PERFECT_MOMENTS_IMAGES = ['rabbit_2.jpg', 'rabbit_3.jpg'];
 
         // Set dynamic background based on time of day
         function setTimeBasedBackground() {
@@ -617,6 +621,17 @@
                     el.classList.add('visible');
                 });
             }, 500);
+            
+            // Add touchstart event listeners for better mobile experience
+            document.querySelectorAll('.memory-vault').forEach(vault => {
+                vault.addEventListener('touchstart', function() {
+                    this.classList.add('touch-active');
+                }, { passive: true });
+                
+                vault.addEventListener('touchend', function() {
+                    this.classList.remove('touch-active');
+                }, { passive: true });
+            });
         });
 
         // Close lightbox when clicking outside the image
@@ -625,6 +640,24 @@
                 closeLightbox();
             }
         });
+        
+        // Prevent zooming on double tap for mobile devices
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Service worker registration for offline capability
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(error => {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
     </script>
 </body>
 </html>
