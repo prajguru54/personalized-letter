@@ -362,13 +362,13 @@
 
     <div class="container">
         <header>
-            <h1 class="fade-in">My Dearest Love</h1>
+            <h1 class="fade-in">My Dear Khutu</h1>
             <div class="time-indicator fade-in" id="time-indicator"></div>
         </header>
 
         <!-- Main Letter Content -->
         <section class="letter-section fade-in">
-            <p>My darling,</p>
+            <p>My Khutu,</p>
             <p>As I sit here writing this virtual love letter, my heart is overflowing with emotions that words can barely contain. Every moment with you feels like a beautiful dream I never want to wake up from.</p>
             <p>You've brought so much joy, laughter, and warmth into my life. Your smile brightens my darkest days, and your love gives me strength I never knew I had.</p>
             <p>This digital letter is just a small token of my affection, a creative way to express how much you mean to me. As you scroll through, I hope you feel the love in every pixel, every animation, and every word.</p>
@@ -381,9 +381,11 @@
             <h2><i class="fas fa-heart memory-icon"></i> When We First Met</h2>
             <div class="click-hint">(Click to reveal)</div>
             <div class="memory-vault-content" id="first-meeting">
-                <p>Do you remember that day? The universe conspired to bring us together, and little did we know that moment would change our lives forever.</p>
-                <p>I was instantly captivated by your presence - your smile, your laugh, the way your eyes lit up when you talked about things you love.</p>
-                <p>That first conversation felt like we'd known each other for years. Some connections are just meant to be, and ours was written in the stars.</p>
+                <p>Do you remember that day? Moi jtya log koriba niki bli hudhisilu aru tumi atyai koru jaanu aru olp din kotha pati lou buli koisila.</p>
+                <p>Tumi koisila exam r pisot ghor jaam aru ahi log korim bli, moi kolu thik ase. Tar pisot tmi robo nwri dudin pist nije kola  "I think we should meet" 🤭</p>
+                <p>First day garit uthi e j dorja khn logai dsila😂.</p>
+                <p>restaurent t goi j photo maribole laj korisila🤭. Ami j gap maintain korisilu duitai😆</p>
+                <p>I will remember that day till my last breath. That was a special moment in my life.</p>
                 <div class="photo-gallery" id="meetings-gallery">
                     <!-- Photos will be loaded dynamically from the meetings folder -->
                 </div>
@@ -436,6 +438,11 @@
     </div>
 
     <script>
+        // Image collections for different categories
+        // Add or remove images from these arrays to update the galleries
+        const MEETINGS_IMAGES = ['20241214_141835.jpg', '20241214_141825.jpg', '20241214_141931.jpg'];
+        const PERFECT_MOMENTS_IMAGES = ['20250114_161748.jpg', '20250202_142310.jpg', '20250202_154933.jpg', '20250112_153159.jpg', '20250315_200931.jpg', '20250125_151139.jpg', '20250309_133946.jpg', '20250201_171103.jpg', '20250216_141835.jpg', '20250125_151234.jpg', '20250214_174922.jpg', '20250125_184123.jpg', '20250208_164427.jpg', '20250206_193905.jpg', '20250301_142704.jpg'];
+
         // Set dynamic background based on time of day
         function setTimeBasedBackground() {
             const now = new Date();
@@ -471,7 +478,7 @@
                 // We'll use a direct approach to load known images
                 if (folderPath === 'photos/meetings') {
                     // Load images from meetings directory
-                    const images = ['rabbit.jpg']; // Add more image filenames as needed
+                    const images = MEETINGS_IMAGES;
                     
                     if (images.length > 0) {
                         images.forEach(imageName => {
@@ -484,7 +491,7 @@
                 } 
                 else if (folderPath === 'photos/perfect_moments') {
                     // Load images from perfect_moments directory
-                    const images = ['rabbit_2.jpg']; // Add more image filenames as needed
+                    const images = PERFECT_MOMENTS_IMAGES;
                     
                     if (images.length > 0) {
                         images.forEach(imageName => {
