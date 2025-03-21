@@ -9,6 +9,36 @@
     <link rel="manifest" href="manifest.json">
     <title>My Virtual Love Letter 💌</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        // Simple service worker registration with no caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // Function to toggle collapsible content
+        function toggleCollapsible(element) {
+            const content = element.nextElementSibling;
+            const isCollapsed = content.style.display === "none" || content.style.display === "";
+            
+            // Toggle content visibility
+            content.style.display = isCollapsed ? "block" : "none";
+            
+            // Change button text based on state
+            if (isCollapsed) {
+                element.textContent = element.getAttribute('data-collapse-text');
+            } else {
+                element.textContent = element.getAttribute('data-reveal-text');
+            }
+        }
+    </script>
     <style>
         /* Color scheme variables for light/dark mode */
         :root {
@@ -225,125 +255,88 @@
 
         /* Letter Content */
         .letter-section {
-            background-color: var(--letter-bg);
+            background-color: #222;
+            color: #fff;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin: 20px 0;
-            position: relative;
+            margin: 2rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            line-height: 1.6;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
-            color: var(--text-color);
-        }
-
-        /* Explicit styles for letter content in light/dark mode */
-        @media (prefers-color-scheme: light) {
-            .letter-section {
-                background-color: #fff;
-                color: #333;
-            }
         }
         
-        @media (prefers-color-scheme: dark) {
-            .letter-section {
-                background-color: #222;
-                color: #fff;
-            }
-        }
-
-        .letter-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--heart-color), var(--heart-color));
-        }
-
         .letter-section p {
-            font-size: 1.1rem;
             margin-bottom: 1rem;
+        }
+        
+        .letter-section .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: var(--heart-color);
+            text-align: right;
+            margin-top: 1.5rem;
         }
 
         /* Memory Vault Sections */
         .memory-vault {
-            background-color: var(--memory-bg);
-            color: var(--memory-text);
-            padding: 30px;
+            background-color: #222;
+            color: #fff;
             border-radius: 15px;
-            margin: 40px 0;
-            position: relative;
+            padding: 20px;
+            margin: 2rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            overflow: hidden;
         }
         
-        /* Explicit styles for memory vault in light/dark mode */
-        @media (prefers-color-scheme: light) {
-            .memory-vault {
-                background-color: #222;
-                color: #fff;
-            }
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .memory-vault {
-                background-color: #333;
-                color: #fff;
-            }
-        }
-
         .memory-vault:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
-
+        
         .memory-vault h2 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 1rem;
             color: var(--heart-color);
+            margin-top: 0;
         }
-
+        
         .memory-content {
-            margin-top: 20px;
             display: none;
-            color: var(--memory-text);
+            padding: 15px 0;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            color: #fff;
         }
-
+        
         .memory-content.visible {
             display: block;
-            animation: fade-in 1s ease;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Gallery */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+            gap: 15px;
             margin-top: 20px;
         }
         
         .gallery-item {
-            position: relative;
-            overflow: hidden;
-            border-radius: 8px;
-            cursor: pointer;
             height: 150px;
-            background-color: var(--section-bg);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
         .gallery-item:hover {
             transform: scale(1.05);
-            border-color: var(--heart-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
         
         .gallery-item img {
@@ -353,7 +346,6 @@
             transition: opacity 0.3s ease;
         }
         
-        /* Gallery caption */
         .gallery-caption {
             position: absolute;
             bottom: 0;
@@ -361,11 +353,11 @@
             right: 0;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 5px;
-            font-size: 12px;
-            text-align: center;
+            padding: 8px;
             transform: translateY(100%);
             transition: transform 0.3s ease;
+            font-size: 0.9rem;
+            text-align: center;
         }
         
         .gallery-item:hover .gallery-caption {
@@ -499,13 +491,6 @@
             color: var(--heart-color);
         }
 
-        .signature {
-            font-family: 'Brush Script MT', cursive;
-            font-size: 2rem;
-            text-align: right;
-            margin-top: 2rem;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -543,6 +528,37 @@
             animation: float 15s linear infinite;
             z-index: -1;
         }
+
+        /* Collapsible section */
+        .collapsible-button {
+            background-color: var(--heart-color);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 15px auto;
+            display: block;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .collapsible-button:hover {
+            background-color: #e91e63;
+            transform: scale(1.05);
+        }
+
+        .collapsible-content {
+            padding: 15px;
+            background-color: #222;
+            color: #fff;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -566,10 +582,10 @@
         <div class="heart-divider fade-in">❤️</div>
 
         <!-- Memory Vault 1: First Meeting -->
-        <section class="memory-vault slide-in-left" onclick="toggleMemoryVault('first-meeting')">
+        <section class="memory-vault slide-in-left">
             <h2><i class="fas fa-heart memory-icon"></i> When We First Met</h2>
-            <div class="click-hint">(Click to reveal)</div>
-            <div class="memory-content" id="first-meeting">
+            <button class="collapsible-button" onclick="toggleCollapsible(this)" data-reveal-text="Click to reveal" data-collapse-text="Click to hide">Click to reveal</button>
+            <div class="collapsible-content" id="first-meeting">
                 <p>Do you remember that day? Moi jtya log koriba niki bli hudhisilu aru tumi atyai koru jaanu aru olp din kotha pati lou buli koisila.</p>
                 <p>Tumi koisila exam r pisot ghor jaam aru ahi log korim bli, moi kolu thik ase. Tar pisot tmi robo nwri dudin pist nije kola  "I think we should meet" 🤭</p>
                 <p>First day garit uthi e j dorja khn logai dsila😂.</p>
@@ -578,30 +594,28 @@
                 <div class="gallery" id="meetings-gallery">
                     <!-- Photos will be loaded dynamically from the meetings folder -->
                 </div>
-                <button class="refresh-btn" onclick="refreshMeetingsGallery()">Refresh Gallery</button>
             </div>
         </section>
 
         <!-- Memory Vault 2: Special Moments -->
-        <section class="memory-vault slide-in-right" onclick="toggleMemoryVault('special-moments')">
+        <section class="memory-vault slide-in-right">
             <h2><i class="fas fa-star memory-icon"></i> Our Special Moments</h2>
-            <div class="click-hint">(Click to reveal)</div>
-            <div class="memory-content" id="special-moments">
-                <p>Life with you is a collection of beautiful moments that I treasure in my heart. From quiet evenings at home to our adventures exploring new places.</p>
-                <p>Every laugh we've shared, every challenge we've overcome together, every quiet moment of understanding - they all weave together into the tapestry of our love story.</p>
-                <p>I love how we can be completely ourselves with each other, how we've created our own little world filled with inside jokes and special memories.</p>
+            <button class="collapsible-button" onclick="toggleCollapsible(this)" data-reveal-text="Click to reveal" data-collapse-text="Click to hide">Click to reveal</button>
+            <div class="collapsible-content" id="special-moments">
+                <p>Tumar logot spend kora every moment ei mur krne special e hoi, tothapiu keikhn man photo select kori disu, suwasun tumar val lage ne nai</p>
+                <!-- <p>Every laugh we've shared, every challenge we've overcome together, every quiet moment of understanding - they all weave together into the tapestry of our love story.</p>
+                <p>I love how we can be completely ourselves with each other, how we've created our own little world filled with inside jokes and special memories.</p> -->
                 <div class="gallery" id="perfect-moments-gallery">
                     <!-- Photos will be loaded dynamically from the perfect_moments folder -->
                 </div>
-                <button class="refresh-btn" onclick="refreshPerfectMomentsGallery()">Refresh Gallery</button>
             </div>
         </section>
 
         <!-- Memory Vault 3: Secret Messages -->
-        <section class="memory-vault scale-in" onclick="toggleMemoryVault('secret-messages')">
+        <section class="memory-vault scale-in">
             <h2><i class="fas fa-envelope memory-icon"></i> Secret Messages</h2>
-            <div class="click-hint">(Click to reveal)</div>
-            <div class="memory-content" id="secret-messages">
+            <button class="collapsible-button" onclick="toggleCollapsible(this)" data-reveal-text="Click to reveal" data-collapse-text="Click to hide">Click to reveal</button>
+            <div class="collapsible-content" id="secret-messages">
                 <p>Some things are meant just for you, my love. Little notes to brighten your day and remind you how special you are to me.</p>
                 <p>You are the most beautiful soul I've ever known. Your kindness, your strength, your passion - everything about you amazes me every single day.</p>
                 <p>I love the way you see the world, how you notice the little things that others miss, how you make ordinary moments extraordinary.</p>
@@ -617,6 +631,17 @@
             <p>I can't wait to create more beautiful memories with you, to face whatever life brings our way together, hand in hand.</p>
             <p>Forever and always,</p>
             <div class="signature">Yours</div>
+        </section>
+
+        <!-- Collapsible Section -->
+        <section class="letter-section fade-in">
+            <h2>Demonstration of Collapsible Content</h2>
+            <button class="collapsible-button" onclick="toggleCollapsible(this)" data-reveal-text="Click to reveal" data-collapse-text="This should not be displayed after clicked, should be displayed after collapsed">Click to reveal</button>
+            <div class="collapsible-content">
+                <p>This is a collapsible section that demonstrates the functionality you requested.</p>
+                <p>When you click the button above, it will change to say "This should not be displayed after clicked, should be displayed after collapsed".</p>
+                <p>When you click it again to collapse this section, the button will revert to saying "Click to reveal".</p>
+            </div>
         </section>
     </div>
 
@@ -687,7 +712,7 @@
                         images.forEach((imageName, index) => {
                             const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
                             console.log(`Loading meeting image ${index + 1}/${images.length}: ${imageName}`);
-                            addImageToGallery(gallery, `photos/meetings/${imageName}`, caption);
+                            addImageToGallery(gallery, `${folderPath}/${imageName}`, caption);
                         });
                     } else {
                         gallery.innerHTML = '<p>💕 No images found in this collection yet...</p>';
@@ -702,7 +727,7 @@
                         images.forEach((imageName, index) => {
                             const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
                             console.log(`Loading perfect moment image ${index + 1}/${images.length}: ${imageName}`);
-                            addImageToGallery(gallery, `photos/perfect_moments/${imageName}`, caption);
+                            addImageToGallery(gallery, `${folderPath}/${imageName}`, caption);
                         });
                     } else {
                         gallery.innerHTML = '<p>💕 No images found in this collection yet...</p>';
@@ -753,12 +778,6 @@
             photoItem.appendChild(img);
             photoItem.appendChild(photoCaption);
             gallery.appendChild(photoItem);
-        }
-
-        // Toggle memory vault sections
-        function toggleMemoryVault(id) {
-            const content = document.getElementById(id);
-            content.classList.toggle('visible');
         }
 
         // Scroll animation handler
@@ -820,25 +839,6 @@
             }
         }
 
-        // Function to check if an image file exists
-        function checkImageExists(url) {
-            console.log(`Checking if image exists: ${url}`);
-            return fetch(url, { method: 'HEAD' })
-                .then(response => {
-                    if (response.ok) {
-                        console.log(`Image exists: ${url}`);
-                        return true;
-                    } else {
-                        console.error(`Image does not exist: ${url} (${response.status})`);
-                        return false;
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error checking image: ${url}`, error);
-                    return false;
-                });
-        }
-
         // Initialize everything when the page loads
         window.addEventListener('DOMContentLoaded', () => {
             // Set up the time-based background
@@ -850,52 +850,15 @@
             // Set up scroll animations
             handleScrollAnimations();
             
-            // Add debugging for image paths
-            console.log("Loading gallery images...");
-            console.log("Meetings images:", MEETINGS_IMAGES);
-            console.log("Perfect moments images:", PERFECT_MOMENTS_IMAGES);
-            
-            // Check if the new image exists using fetch
-            checkImageExists("photos/perfect_moments/20250118_161847.jpg")
-                .then(exists => {
-                    if (exists) {
-                        console.log("New image exists and can be loaded on page load!");
-                        // Use the manual method to load images
-                        setTimeout(addNewImageManually, 1000);
-                    } else {
-                        console.error("New image cannot be loaded on page load!");
-                        // Load images for each gallery using the regular method
-                        setTimeout(() => {
-                            loadGalleryImages('meetings-gallery', 'photos/meetings');
-                            loadGalleryImages('perfect-moments-gallery', 'photos/perfect_moments');
-                            console.log("Gallery images should be loaded now");
-                        }, 500);
-                    }
-                });
+            // Load gallery images
+            loadGalleryImages('meetings-gallery', 'photos/meetings');
+            loadGalleryImages('perfect-moments-gallery', 'photos/perfect_moments');
             
             // Update time-based background every minute
             setInterval(setTimeBasedBackground, 60000);
             
             // Handle scroll animations
             window.addEventListener('scroll', handleScrollAnimations);
-            
-            // Trigger initial animations
-            setTimeout(() => {
-                document.querySelectorAll('header .fade-in').forEach(el => {
-                    el.classList.add('visible');
-                });
-            }, 500);
-            
-            // Add touchstart event listeners for better mobile experience
-            document.querySelectorAll('.memory-vault').forEach(vault => {
-                vault.addEventListener('touchstart', function() {
-                    this.classList.add('touch-active');
-                }, { passive: true });
-                
-                vault.addEventListener('touchend', function() {
-                    this.classList.remove('touch-active');
-                }, { passive: true });
-            });
         });
 
         // Close lightbox when clicking outside the image
@@ -911,218 +874,6 @@
                 e.preventDefault();
             }
         }, { passive: false });
-        
-        // Register service worker for offline support
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            });
-        }
-
-        // Browser detection for Microsoft Edge
-        function isEdge() {
-            return navigator.userAgent.indexOf("Edge") > -1 || 
-                   navigator.userAgent.indexOf("Edg") > -1;
-        }
-        
-        // Apply Edge-specific styles if needed
-        function applyEdgeStyles() {
-            if (isEdge()) {
-                console.log("Microsoft Edge detected, applying specific styles");
-                
-                // Apply dark styles to letter sections
-                document.querySelectorAll('.letter-section').forEach(section => {
-                    section.style.backgroundColor = '#222';
-                    section.style.color = '#fff';
-                });
-                
-                // Apply dark styles to memory vaults
-                document.querySelectorAll('.memory-vault').forEach(vault => {
-                    vault.style.backgroundColor = '#222';
-                    vault.style.color = '#fff';
-                });
-                
-                // Ensure memory content is visible
-                document.querySelectorAll('.memory-content').forEach(content => {
-                    content.style.color = '#fff';
-                });
-                
-                // Add a class to the body for Edge-specific CSS
-                document.body.classList.add('edge-browser');
-            }
-        }
-        
-        // Call on page load and after DOM changes
-        window.addEventListener('DOMContentLoaded', () => {
-            applyEdgeStyles();
-            
-            // Also apply styles when memory vaults are toggled
-            document.querySelectorAll('.memory-vault').forEach(vault => {
-                vault.addEventListener('click', () => {
-                    // Small delay to ensure DOM has updated
-                    setTimeout(applyEdgeStyles, 100);
-                });
-            });
-        });
-
-        // Refresh perfect moments gallery
-        function refreshPerfectMomentsGallery() {
-            console.log("Refreshing perfect moments gallery...");
-            
-            // Clear the gallery first
-            const gallery = document.getElementById('perfect-moments-gallery');
-            if (gallery) {
-                gallery.innerHTML = '<p>Refreshing gallery...</p>';
-            }
-            
-            // Check if the new image exists using fetch
-            checkImageExists("photos/perfect_moments/20250118_161847.jpg")
-                .then(exists => {
-                    if (exists) {
-                        console.log("New image exists and can be loaded!");
-                        // Manually add the new image to the gallery
-                        addNewImageManually();
-                    } else {
-                        console.error("New image cannot be loaded!");
-                        // Try to load all images anyway
-                        loadGalleryImages('perfect-moments-gallery', 'photos/perfect_moments');
-                    }
-                });
-        }
-        
-        // Function to manually add the new image to the gallery
-        function addNewImageManually() {
-            console.log("Manually adding new image to gallery");
-            const gallery = document.getElementById('perfect-moments-gallery');
-            
-            if (!gallery) {
-                console.error("Gallery element not found");
-                return;
-            }
-            
-            // Clear the gallery
-            gallery.innerHTML = '';
-            
-            // Add each image from the array manually
-            PERFECT_MOMENTS_IMAGES.forEach((imageName, index) => {
-                const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-                console.log(`Manually adding image ${index + 1}/${PERFECT_MOMENTS_IMAGES.length}: ${imageName}`);
-                
-                const photoItem = document.createElement('div');
-                photoItem.className = 'gallery-item';
-                photoItem.onclick = function() { openLightbox(`photos/perfect_moments/${imageName}`, caption); };
-                
-                const img = document.createElement('img');
-                img.src = `photos/perfect_moments/${imageName}`;
-                img.alt = caption;
-                
-                // Add error handling
-                img.onerror = function() {
-                    console.error(`Failed to load image: ${imageName}`);
-                    this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_16e19a7ac7b%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_16e19a7ac7b%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.609375%22%20y%3D%2280%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
-                    this.alt = 'Image failed to load';
-                };
-                
-                // Add loading indicator
-                img.style.opacity = '0';
-                img.onload = function() {
-                    this.style.opacity = '1';
-                    console.log(`Successfully loaded image: ${imageName}`);
-                };
-                
-                const photoCaption = document.createElement('div');
-                photoCaption.className = 'gallery-caption';
-                photoCaption.textContent = caption;
-                
-                photoItem.appendChild(img);
-                photoItem.appendChild(photoCaption);
-                gallery.appendChild(photoItem);
-            });
-            
-            // Also load the meetings gallery
-            loadMeetingsGalleryManually();
-        }
-        
-        // Function to manually load the meetings gallery
-        function loadMeetingsGalleryManually() {
-            console.log("Manually loading meetings gallery");
-            const gallery = document.getElementById('meetings-gallery');
-            
-            if (!gallery) {
-                console.error("Meetings gallery element not found");
-                return;
-            }
-            
-            // Clear the gallery
-            gallery.innerHTML = '';
-            
-            // Add each image from the array manually
-            MEETINGS_IMAGES.forEach((imageName, index) => {
-                const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-                console.log(`Manually adding meeting image ${index + 1}/${MEETINGS_IMAGES.length}: ${imageName}`);
-                
-                const photoItem = document.createElement('div');
-                photoItem.className = 'gallery-item';
-                photoItem.onclick = function() { openLightbox(`photos/meetings/${imageName}`, caption); };
-                
-                const img = document.createElement('img');
-                img.src = `photos/meetings/${imageName}`;
-                img.alt = caption;
-                
-                // Add error handling
-                img.onerror = function() {
-                    console.error(`Failed to load meeting image: ${imageName}`);
-                    this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_16e19a7ac7b%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_16e19a7ac7b%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.609375%22%20y%3D%2280%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
-                    this.alt = 'Image failed to load';
-                };
-                
-                // Add loading indicator
-                img.style.opacity = '0';
-                img.onload = function() {
-                    this.style.opacity = '1';
-                    console.log(`Successfully loaded meeting image: ${imageName}`);
-                };
-                
-                const photoCaption = document.createElement('div');
-                photoCaption.className = 'gallery-caption';
-                photoCaption.textContent = caption;
-                
-                photoItem.appendChild(img);
-                photoItem.appendChild(photoCaption);
-                gallery.appendChild(photoItem);
-            });
-        }
-
-        // Refresh meetings gallery
-        function refreshMeetingsGallery() {
-            console.log("Refreshing meetings gallery...");
-            
-            // Clear the gallery first
-            const gallery = document.getElementById('meetings-gallery');
-            if (gallery) {
-                gallery.innerHTML = '<p>Refreshing gallery...</p>';
-            }
-            
-            // Check if the new image exists using fetch
-            checkImageExists("photos/meetings/20241214_141835.jpg")
-                .then(exists => {
-                    if (exists) {
-                        console.log("New image exists and can be loaded!");
-                        // Manually add the new image to the gallery
-                        loadMeetingsGalleryManually();
-                    } else {
-                        console.error("New image cannot be loaded!");
-                        // Try to load all images anyway
-                        loadGalleryImages('meetings-gallery', 'photos/meetings');
-                    }
-                });
-        }
     </script>
 </body>
 </html>
