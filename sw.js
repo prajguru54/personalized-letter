@@ -3,12 +3,30 @@ const CACHE_NAME = 'virtual-love-letter-v1';
 const STATIC_CACHE_NAME = 'virtual-love-letter-static-v1';
 const IMAGE_CACHE_NAME = 'virtual-love-letter-images-v1';
 
+// Get the repository name for GitHub Pages
+function getRepoPath() {
+  const path = self.location.pathname;
+  const pathParts = path.split('/');
+  // Remove the sw.js part and empty parts
+  const filteredParts = pathParts.filter(part => part && part !== 'sw.js');
+  
+  if (filteredParts.length > 0) {
+    // Return the repository path with leading and trailing slashes
+    return '/' + filteredParts.join('/') + '/';
+  }
+  return '/'; // Default if not in a subdirectory
+}
+
+// The repository path for GitHub Pages (e.g., '/repo-name/')
+const REPO_PATH = getRepoPath();
+
 // Core assets that should always be cached on install
 const CORE_ASSETS = [
-  './',
-  './virtual-love-letter.html',
-  './index.html',
-  './manifest.json',
+  REPO_PATH,
+  REPO_PATH + 'virtual-love-letter.html',
+  REPO_PATH + 'index.html',
+  REPO_PATH + 'manifest.json',
+  REPO_PATH + 'sw.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
@@ -44,9 +62,10 @@ self.addEventListener('activate', event => {
 function isImageRequest(request) {
   const url = new URL(request.url);
   return (
-    url.pathname.startsWith('/photos/') || 
-    url.pathname.includes('/photos/') ||
-    url.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
+    url.pathname.includes('/photos/') || 
+    url.pathname.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ||
+    // Match your actual image filenames
+    url.pathname.match(/(20241214|20250114|20250202|20250112|20250315|20250125|20250309|20250201|20250216|20250214|20250208|20250206|20250301)_\d+\.jpg$/i)
   );
 }
 
@@ -54,8 +73,18 @@ function isImageRequest(request) {
 self.addEventListener('fetch', event => {
   const request = event.request;
   
-  // Skip non-GET requests and cross-origin requests
-  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) {
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+  
+  // Create a URL object for easier parsing
+  const url = new URL(request.url);
+  
+  // Skip requests that aren't from our origin or GitHub Pages domain
+  if (!url.origin.includes(self.location.origin) && 
+      !url.origin.includes('github.io') && 
+      !url.hostname.includes('localhost')) {
     return;
   }
   
@@ -102,6 +131,7 @@ self.addEventListener('fetch', event => {
               // Only cache core assets and HTML/CSS/JS files
               if (
                 CORE_ASSETS.includes(new URL(request.url).pathname) ||
+                CORE_ASSETS.some(asset => new URL(request.url).pathname.endsWith(asset)) ||
                 request.url.match(/\.(html|css|js)$/i)
               ) {
                 cache.put(request, networkResponse.clone());
