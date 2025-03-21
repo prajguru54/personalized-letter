@@ -345,6 +345,32 @@
             transform: scale(1.05);
             border-color: var(--heart-color);
         }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Gallery caption */
+        .gallery-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            font-size: 12px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover .gallery-caption {
+            transform: translateY(0);
+        }
 
         .memory-icon {
             font-size: 1.5rem;
@@ -402,23 +428,28 @@
             transform: translateY(0);
         }
 
-        /* Gallery caption */
-        .gallery-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(0, 0, 0, 0.7);
+        /* Refresh button */
+        .refresh-btn {
+            display: block;
+            margin: 15px auto;
+            padding: 8px 15px;
+            background-color: var(--heart-color);
             color: white;
-            padding: 5px;
-            font-size: 12px;
-            text-align: center;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
-        
-        .gallery-item:hover .gallery-caption {
-            transform: translateY(0);
+
+        .refresh-btn:hover {
+            background-color: #e91e63;
+            transform: scale(1.05);
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.98);
         }
 
         /* Lightbox */
@@ -547,6 +578,7 @@
                 <div class="gallery" id="meetings-gallery">
                     <!-- Photos will be loaded dynamically from the meetings folder -->
                 </div>
+                <button class="refresh-btn" onclick="refreshMeetingsGallery()">Refresh Gallery</button>
             </div>
         </section>
 
@@ -561,6 +593,7 @@
                 <div class="gallery" id="perfect-moments-gallery">
                     <!-- Photos will be loaded dynamically from the perfect_moments folder -->
                 </div>
+                <button class="refresh-btn" onclick="refreshPerfectMomentsGallery()">Refresh Gallery</button>
             </div>
         </section>
 
@@ -599,7 +632,7 @@
         // Image collections for different categories
         // Add or remove images from these arrays to update the galleries
         const MEETINGS_IMAGES = ['20241214_141835.jpg', '20241214_141825.jpg', '20241214_141931.jpg'];
-        const PERFECT_MOMENTS_IMAGES = ['20250114_161748.jpg', '20250202_142310.jpg', '20250202_154933.jpg', '20250112_153159.jpg', '20250315_200931.jpg', '20250125_151139.jpg', '20250309_133946.jpg', '20250201_171103.jpg', '20250216_141835.jpg', '20250125_151234.jpg', '20250214_174922.jpg', '20250125_184123.jpg', '20250208_164427.jpg', '20250206_193905.jpg', '20250301_142704.jpg'];
+        const PERFECT_MOMENTS_IMAGES = ['20250114_161748.jpg', '20250202_142310.jpg', '20250202_154933.jpg', '20250112_153159.jpg', '20250315_200931.jpg', '20250125_151139.jpg', '20250309_133946.jpg', '20250201_171103.jpg', '20250118_161847.jpg', '20250216_141835.jpg', '20250125_151234.jpg', '20250214_174922.jpg', '20250125_184123.jpg', '20250208_164427.jpg', '20250206_193905.jpg', '20250301_142704.jpg'];
 
         // Set dynamic background based on time of day
         function setTimeBasedBackground() {
@@ -639,29 +672,37 @@
             const gallery = document.getElementById(galleryId);
             
             try {
+                // Clear any existing content
+                gallery.innerHTML = '';
+                console.log(`Loading gallery: ${galleryId} from path: ${folderPath}`);
+                
                 // For local development without a server that supports directory listing
                 // We'll use a direct approach to load known images
-                if (folderPath === 'photos/meetings') {
+                if (galleryId === 'meetings-gallery') {
                     // Load images from meetings directory
                     const images = MEETINGS_IMAGES;
+                    console.log(`Loading ${images.length} meeting images`);
                     
                     if (images.length > 0) {
-                        images.forEach(imageName => {
+                        images.forEach((imageName, index) => {
                             const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-                            addImageToGallery(gallery, `${folderPath}/${imageName}`, caption);
+                            console.log(`Loading meeting image ${index + 1}/${images.length}: ${imageName}`);
+                            addImageToGallery(gallery, `photos/meetings/${imageName}`, caption);
                         });
                     } else {
                         gallery.innerHTML = '<p>💕 No images found in this collection yet...</p>';
                     }
                 } 
-                else if (folderPath === 'photos/perfect_moments') {
+                else if (galleryId === 'perfect-moments-gallery') {
                     // Load images from perfect_moments directory
                     const images = PERFECT_MOMENTS_IMAGES;
+                    console.log(`Loading ${images.length} perfect moment images`);
                     
                     if (images.length > 0) {
-                        images.forEach(imageName => {
+                        images.forEach((imageName, index) => {
                             const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-                            addImageToGallery(gallery, `${folderPath}/${imageName}`, caption);
+                            console.log(`Loading perfect moment image ${index + 1}/${images.length}: ${imageName}`);
+                            addImageToGallery(gallery, `photos/perfect_moments/${imageName}`, caption);
                         });
                     } else {
                         gallery.innerHTML = '<p>💕 No images found in this collection yet...</p>';
@@ -685,6 +726,25 @@
             const img = document.createElement('img');
             img.src = imageSrc;
             img.alt = caption;
+            
+            // Add error handling for images
+            img.onerror = function() {
+                console.error(`Failed to load image: ${imageSrc}`);
+                // Log additional information for debugging
+                console.log(`Image path: ${imageSrc}`);
+                console.log(`Image caption: ${caption}`);
+                console.log(`Gallery ID: ${gallery.id}`);
+                
+                this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_16e19a7ac7b%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_16e19a7ac7b%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.609375%22%20y%3D%2280%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                this.alt = 'Image failed to load';
+            };
+            
+            // Add loading indicator
+            img.style.opacity = '0';
+            img.onload = function() {
+                this.style.opacity = '1';
+                console.log(`Successfully loaded image: ${imageSrc}`);
+            };
             
             const photoCaption = document.createElement('div');
             photoCaption.className = 'gallery-caption';
@@ -760,15 +820,58 @@
             }
         }
 
+        // Function to check if an image file exists
+        function checkImageExists(url) {
+            console.log(`Checking if image exists: ${url}`);
+            return fetch(url, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`Image exists: ${url}`);
+                        return true;
+                    } else {
+                        console.error(`Image does not exist: ${url} (${response.status})`);
+                        return false;
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error checking image: ${url}`, error);
+                    return false;
+                });
+        }
+
         // Initialize everything when the page loads
         window.addEventListener('DOMContentLoaded', () => {
+            // Set up the time-based background
             setTimeBasedBackground();
+            
+            // Create floating hearts animation
             createFloatingHearts();
+            
+            // Set up scroll animations
             handleScrollAnimations();
             
-            // Load images for each gallery
-            loadGalleryImages('meetings-gallery', 'photos/meetings');
-            loadGalleryImages('perfect-moments-gallery', 'photos/perfect_moments');
+            // Add debugging for image paths
+            console.log("Loading gallery images...");
+            console.log("Meetings images:", MEETINGS_IMAGES);
+            console.log("Perfect moments images:", PERFECT_MOMENTS_IMAGES);
+            
+            // Check if the new image exists using fetch
+            checkImageExists("photos/perfect_moments/20250118_161847.jpg")
+                .then(exists => {
+                    if (exists) {
+                        console.log("New image exists and can be loaded on page load!");
+                        // Use the manual method to load images
+                        setTimeout(addNewImageManually, 1000);
+                    } else {
+                        console.error("New image cannot be loaded on page load!");
+                        // Load images for each gallery using the regular method
+                        setTimeout(() => {
+                            loadGalleryImages('meetings-gallery', 'photos/meetings');
+                            loadGalleryImages('perfect-moments-gallery', 'photos/perfect_moments');
+                            console.log("Gallery images should be loaded now");
+                        }, 500);
+                    }
+                });
             
             // Update time-based background every minute
             setInterval(setTimeBasedBackground, 60000);
@@ -809,36 +912,19 @@
             }
         }, { passive: false });
         
-        // Service worker registration for offline capability
+        // Register service worker for offline support
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then(registration => {
                         console.log('Service Worker registered with scope:', registration.scope);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            console.log('New service worker installing');
-                            
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('New content is available; please refresh.');
-                                }
-                            });
-                        });
                     })
                     .catch(error => {
                         console.error('Service Worker registration failed:', error);
                     });
-                    
-                // Handle service worker updates
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    console.log('Controller changed - reloading page for fresh content');
-                });
             });
         }
-        
+
         // Browser detection for Microsoft Edge
         function isEdge() {
             return navigator.userAgent.indexOf("Edge") > -1 || 
@@ -884,6 +970,159 @@
                 });
             });
         });
+
+        // Refresh perfect moments gallery
+        function refreshPerfectMomentsGallery() {
+            console.log("Refreshing perfect moments gallery...");
+            
+            // Clear the gallery first
+            const gallery = document.getElementById('perfect-moments-gallery');
+            if (gallery) {
+                gallery.innerHTML = '<p>Refreshing gallery...</p>';
+            }
+            
+            // Check if the new image exists using fetch
+            checkImageExists("photos/perfect_moments/20250118_161847.jpg")
+                .then(exists => {
+                    if (exists) {
+                        console.log("New image exists and can be loaded!");
+                        // Manually add the new image to the gallery
+                        addNewImageManually();
+                    } else {
+                        console.error("New image cannot be loaded!");
+                        // Try to load all images anyway
+                        loadGalleryImages('perfect-moments-gallery', 'photos/perfect_moments');
+                    }
+                });
+        }
+        
+        // Function to manually add the new image to the gallery
+        function addNewImageManually() {
+            console.log("Manually adding new image to gallery");
+            const gallery = document.getElementById('perfect-moments-gallery');
+            
+            if (!gallery) {
+                console.error("Gallery element not found");
+                return;
+            }
+            
+            // Clear the gallery
+            gallery.innerHTML = '';
+            
+            // Add each image from the array manually
+            PERFECT_MOMENTS_IMAGES.forEach((imageName, index) => {
+                const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+                console.log(`Manually adding image ${index + 1}/${PERFECT_MOMENTS_IMAGES.length}: ${imageName}`);
+                
+                const photoItem = document.createElement('div');
+                photoItem.className = 'gallery-item';
+                photoItem.onclick = function() { openLightbox(`photos/perfect_moments/${imageName}`, caption); };
+                
+                const img = document.createElement('img');
+                img.src = `photos/perfect_moments/${imageName}`;
+                img.alt = caption;
+                
+                // Add error handling
+                img.onerror = function() {
+                    console.error(`Failed to load image: ${imageName}`);
+                    this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_16e19a7ac7b%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_16e19a7ac7b%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.609375%22%20y%3D%2280%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                    this.alt = 'Image failed to load';
+                };
+                
+                // Add loading indicator
+                img.style.opacity = '0';
+                img.onload = function() {
+                    this.style.opacity = '1';
+                    console.log(`Successfully loaded image: ${imageName}`);
+                };
+                
+                const photoCaption = document.createElement('div');
+                photoCaption.className = 'gallery-caption';
+                photoCaption.textContent = caption;
+                
+                photoItem.appendChild(img);
+                photoItem.appendChild(photoCaption);
+                gallery.appendChild(photoItem);
+            });
+            
+            // Also load the meetings gallery
+            loadMeetingsGalleryManually();
+        }
+        
+        // Function to manually load the meetings gallery
+        function loadMeetingsGalleryManually() {
+            console.log("Manually loading meetings gallery");
+            const gallery = document.getElementById('meetings-gallery');
+            
+            if (!gallery) {
+                console.error("Meetings gallery element not found");
+                return;
+            }
+            
+            // Clear the gallery
+            gallery.innerHTML = '';
+            
+            // Add each image from the array manually
+            MEETINGS_IMAGES.forEach((imageName, index) => {
+                const caption = imageName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+                console.log(`Manually adding meeting image ${index + 1}/${MEETINGS_IMAGES.length}: ${imageName}`);
+                
+                const photoItem = document.createElement('div');
+                photoItem.className = 'gallery-item';
+                photoItem.onclick = function() { openLightbox(`photos/meetings/${imageName}`, caption); };
+                
+                const img = document.createElement('img');
+                img.src = `photos/meetings/${imageName}`;
+                img.alt = caption;
+                
+                // Add error handling
+                img.onerror = function() {
+                    console.error(`Failed to load meeting image: ${imageName}`);
+                    this.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_16e19a7ac7b%20text%20%7B%20fill%3A%23999%3Bfont-weight%3Anormal%3Bfont-family%3A-apple-system%2CBlinkMacSystemFont%2C%26quot%3BSegoe%20UI%26quot%3B%2CRoboto%2C%26quot%3BHelvetica%20Neue%26quot%3B%2CArial%2C%26quot%3BNoto%20Sans%26quot%3B%2Csans-serif%2C%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%26quot%3BSegoe%20UI%20Symbol%26quot%3B%2C%26quot%3BNoto%20Color%20Emoji%26quot%3B%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_16e19a7ac7b%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23373940%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2255.609375%22%20y%3D%2280%22%3EImage%20Error%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+                    this.alt = 'Image failed to load';
+                };
+                
+                // Add loading indicator
+                img.style.opacity = '0';
+                img.onload = function() {
+                    this.style.opacity = '1';
+                    console.log(`Successfully loaded meeting image: ${imageName}`);
+                };
+                
+                const photoCaption = document.createElement('div');
+                photoCaption.className = 'gallery-caption';
+                photoCaption.textContent = caption;
+                
+                photoItem.appendChild(img);
+                photoItem.appendChild(photoCaption);
+                gallery.appendChild(photoItem);
+            });
+        }
+
+        // Refresh meetings gallery
+        function refreshMeetingsGallery() {
+            console.log("Refreshing meetings gallery...");
+            
+            // Clear the gallery first
+            const gallery = document.getElementById('meetings-gallery');
+            if (gallery) {
+                gallery.innerHTML = '<p>Refreshing gallery...</p>';
+            }
+            
+            // Check if the new image exists using fetch
+            checkImageExists("photos/meetings/20241214_141835.jpg")
+                .then(exists => {
+                    if (exists) {
+                        console.log("New image exists and can be loaded!");
+                        // Manually add the new image to the gallery
+                        loadMeetingsGalleryManually();
+                    } else {
+                        console.error("New image cannot be loaded!");
+                        // Try to load all images anyway
+                        loadGalleryImages('meetings-gallery', 'photos/meetings');
+                    }
+                });
+        }
     </script>
 </body>
 </html>
