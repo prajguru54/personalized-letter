@@ -44,6 +44,54 @@
             }
         }
         
+        /* Microsoft Edge and IE compatibility */
+        @supports (-ms-ime-align:auto) {
+            body {
+                color: #333;
+                background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            }
+            
+            .letter-section {
+                background-color: rgba(30, 30, 30, 0.9) !important;
+                color: #fff !important;
+            }
+            
+            .memory-vault {
+                background-color: rgba(30, 30, 30, 0.9) !important;
+                color: #fff !important;
+            }
+            
+            .memory-content {
+                color: #fff !important;
+            }
+            
+            .night-bg, .evening-bg {
+                color: #fff !important;
+            }
+            
+            .morning-bg, .day-bg {
+                color: #333 !important;
+            }
+        }
+        
+        /* Fallback for browsers that don't support CSS variables */
+        @supports not (--foo: green) {
+            body {
+                color: #333;
+                background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            }
+            
+            .letter-section {
+                background-color: #222 !important;
+                color: #fff !important;
+            }
+            
+            .memory-vault {
+                background-color: #222 !important;
+                color: #fff !important;
+            }
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -189,6 +237,21 @@
             color: var(--text-color);
         }
 
+        /* Explicit styles for letter content in light/dark mode */
+        @media (prefers-color-scheme: light) {
+            .letter-section {
+                background-color: #fff;
+                color: #333;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .letter-section {
+                background-color: #222;
+                color: #fff;
+            }
+        }
+
         .letter-section::before {
             content: '';
             position: absolute;
@@ -218,6 +281,21 @@
             margin-left: auto;
             margin-right: auto;
             overflow: hidden;
+        }
+        
+        /* Explicit styles for memory vault in light/dark mode */
+        @media (prefers-color-scheme: light) {
+            .memory-vault {
+                background-color: #222;
+                color: #fff;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .memory-vault {
+                background-color: #333;
+                color: #fff;
+            }
         }
 
         .memory-vault:hover {
@@ -734,31 +812,78 @@
         // Service worker registration for offline capability
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    
-                    // Check for updates to the service worker
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        console.log('New service worker installing');
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
                         
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('New content is available; please refresh.');
-                                // You could show a notification to the user here
-                            }
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('New service worker installing');
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('New content is available; please refresh.');
+                                }
+                            });
                         });
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
                     });
-                }).catch(error => {
-                    console.error('ServiceWorker registration failed: ', error);
-                });
-                
+                    
                 // Handle service worker updates
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
                     console.log('Controller changed - reloading page for fresh content');
                 });
             });
         }
+        
+        // Browser detection for Microsoft Edge
+        function isEdge() {
+            return navigator.userAgent.indexOf("Edge") > -1 || 
+                   navigator.userAgent.indexOf("Edg") > -1;
+        }
+        
+        // Apply Edge-specific styles if needed
+        function applyEdgeStyles() {
+            if (isEdge()) {
+                console.log("Microsoft Edge detected, applying specific styles");
+                
+                // Apply dark styles to letter sections
+                document.querySelectorAll('.letter-section').forEach(section => {
+                    section.style.backgroundColor = '#222';
+                    section.style.color = '#fff';
+                });
+                
+                // Apply dark styles to memory vaults
+                document.querySelectorAll('.memory-vault').forEach(vault => {
+                    vault.style.backgroundColor = '#222';
+                    vault.style.color = '#fff';
+                });
+                
+                // Ensure memory content is visible
+                document.querySelectorAll('.memory-content').forEach(content => {
+                    content.style.color = '#fff';
+                });
+                
+                // Add a class to the body for Edge-specific CSS
+                document.body.classList.add('edge-browser');
+            }
+        }
+        
+        // Call on page load and after DOM changes
+        window.addEventListener('DOMContentLoaded', () => {
+            applyEdgeStyles();
+            
+            // Also apply styles when memory vaults are toggled
+            document.querySelectorAll('.memory-vault').forEach(vault => {
+                vault.addEventListener('click', () => {
+                    // Small delay to ensure DOM has updated
+                    setTimeout(applyEdgeStyles, 100);
+                });
+            });
+        });
     </script>
 </body>
 </html>
