@@ -12,7 +12,7 @@ A beautiful, interactive virtual love letter with animations, photo galleries, a
 
 ## How to View
 
-Simply visit: https://YOUR-USERNAME.github.io/personal-letter/virtual-love-letter.html
+Simply visit: https://prajguru54.github.io/personal-letter/virtual-love-letter.html
 
 ## For Developers
 
